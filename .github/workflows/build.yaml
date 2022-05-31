@@ -1,0 +1,57 @@
+name: Build libm17
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up LLVM 14
+        uses: KyleMayes/install-llvm-action@v1.5.3
+        with:
+          version: "14"
+
+      - name: Build Check
+        run: >-
+          make -k ci
+
+      - name: Get Size
+        id: size
+        if: github.event_name == 'pull_request' && success()
+        run: >-
+          echo "::set-output name=SIZE::$(
+            stat --printf="%s" libm17.a
+          )"
+
+      - name: Comment PR on Success
+        uses: thollander/actions-comment-pull-request@v1
+        if: github.event_name == 'pull_request' && success()
+        with:
+          message: >-
+            Build Passed:
+            \tSize: ${{ steps.size.outputs.SIZE }} bytes
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build with Output on Failure
+        id: build
+        if: github.event_name == 'pull_request' && failure()
+        run: >-
+          echo "::set-output name=BUILD_OUTPUT::$(
+            make -k clean ci
+          )"
+
+      - name: Comment PR on Failure
+        uses: thollander/actions-comment-pull-request@v1
+        if: github.event_name == 'pull_request' && failure()
+        with:
+          message: >-
+            Build Failed:
+
+            ```
+            ${{ steps.build.outputs.BUILD_OUTPUT }}
+            ```
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
