@@ -1,0 +1,46 @@
+name: Test libm17
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up LLVM 14
+        uses: KyleMayes/install-llvm-action@v1.5.3
+        with:
+          version: "14"
+
+      - name: Test
+        run: >-
+          make test
+
+      - name: Comment PR on Success
+        uses: thollander/actions-comment-pull-request@v1
+        if: github.event_name == 'pull_request' && success()
+        with:
+          message: |
+            Tests Passed!
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test with Output on Failure
+        if: github.event_name == 'pull_request' && failure()
+        id: test
+        run: >-
+          echo "::set-output name=TEST_OUTPUT::$(make -k clean test 2>&1 | python3 -c 'import sys; print(sys.stdin.read().replace("%","%25").replace("\n","%0A").replace("\r","%0D"))')"
+
+      - name: Comment PR on Failure
+        uses: thollander/actions-comment-pull-request@v1
+        if: github.event_name == 'pull_request' && failure()
+        with:
+          message: >-
+            Tests Failed:
+
+            ```
+            ${{ steps.test.outputs.TEST_OUTPUT }}
+            ```
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
