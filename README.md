@@ -23,3 +23,11 @@ By default, this project will compile for the host OS. To build for an alternati
 - `format` - Runs `clang-format` to format the code according to the code style in `.clang-format`.
 - `format-check` - Runs `clang-format` to check code for formatting issues. DOES NOT FORMAT THE FILES.
 - `sca` - Rebuilds with LLVM's `scan-build` for static code analysis.
+
+## Docs
+
+TODO
+
+## Examples
+
+TODO
