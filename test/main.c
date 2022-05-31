@@ -9,7 +9,7 @@ int main() {
     int pass_counter = 0;
     int fail_counter = 0;
 
-    ASSERT("Dummy func always returns 1", m17_dummyfunc() != 1, pass_counter, fail_counter);
+    ASSERT("Dummy func always returns 1", m17_dummyfunc() == 1, pass_counter, fail_counter);
 
     int total_tests = pass_counter + fail_counter;
 
