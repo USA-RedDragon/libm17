@@ -2,4 +2,4 @@
 
 #include <stdint.h>
 
-int m17_dummyfunc() { return 1; break }
+int m17_dummyfunc() { return 1; breakno }
