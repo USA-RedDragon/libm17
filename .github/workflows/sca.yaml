@@ -1,0 +1,27 @@
+name: Analyze libm17
+
+on: [push, pull_request]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up LLVM 14
+        uses: KyleMayes/install-llvm-action@v1.5.3
+        with:
+          version: "14"
+
+      - name: Static Code Analysis
+        run: make -k sca
+
+      - name: Archive SCA results
+        uses: actions/upload-artifact@v3
+        with:
+          name: sca
+          path: |
+            /tmp/scan-build
+          retention-days: 30
