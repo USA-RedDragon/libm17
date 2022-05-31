@@ -1,0 +1,45 @@
+name: Formatting Check
+
+on: [push, pull_request]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up LLVM 14
+        uses: KyleMayes/install-llvm-action@v1.5.3
+        with:
+          version: "14"
+
+      - name: Formatting Check
+        run: |-
+          make format-check
+
+      - name: Comment PR on Success
+        uses: thollander/actions-comment-pull-request@v1
+        if: github.event_name == 'pull_request' && success()
+        with:
+          message: Formatting check passed!
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Format with Output on Failure
+        id: format
+        if: github.event_name == 'pull_request' && failure()
+        run: >-
+          echo "::set-output name=FORMAT_OUTPUT::$(make -k format-check 2>&1 | python3 -c 'import sys; print(sys.stdin.read().replace("%","%25").replace("\n","%0A").replace("\r","%0D"))')"
+
+      - name: Comment PR on Failure
+        uses: thollander/actions-comment-pull-request@v1
+        if: github.event_name == 'pull_request' && failure()
+        with:
+          message: |-
+            Format check failed, run `make format`:
+
+            ```
+            ${{ steps.format.outputs.FORMAT_OUTPUT }}
+            ```
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
