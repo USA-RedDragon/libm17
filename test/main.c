@@ -5,8 +5,7 @@
 #include "assert.h"
 #include <stdio.h>
 
-int main()
-{
+int main() {
     int pass_counter = 0;
     int fail_counter = 0;
 
